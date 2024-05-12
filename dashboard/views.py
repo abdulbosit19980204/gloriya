@@ -11,17 +11,18 @@ from zeep.transports import Transport
 from lxml import etree
 from datetime import datetime as dt
 
+settings = Settings(strict=False, xml_huge_tree=True)
+history = HistoryPlugin()
+transport = Transport(timeout=10)
+reasionsReturn = 'http://192.168.1.241:5443/EVYAP_UT/EVYAP_UT.1cws?wsdl'
+client = Client(wsdl=reasionsReturn, transport=transport, plugins=[history], settings=settings)
+
 
 # Create your views here.
-@api_view(['GET'])
+# @api_view(['GET'])
 def dashboard_view(request):
     # return render(request, 'dashboard.html')
 
-    settings = Settings(strict=False, xml_huge_tree=True)
-    history = HistoryPlugin()
-    transport = Transport(timeout=10)
-    reasionsReturn = 'http://192.168.1.241:5443/EVYAP_UT/EVYAP_UT.1cws?wsdl'
-    client = Client(wsdl=reasionsReturn, transport=transport, plugins=[history], settings=settings)
     user = client.service.GetUserByTelegramID(5814532358)
     print(user)
     orders = client.service.GetOrderList(user['Code'])
@@ -47,12 +48,13 @@ def dashboard_view(request):
     except:
         user = None
 
-    return Response(
-        status=status.HTTP_200_OK,
-        data={
-            "cilent": user
-        }
-    )
+    # return Response(
+    #     status=status.HTTP_200_OK,
+    #     data={
+    #         "cilent": user
+    #     }
+    # )
+    return render(request, '../templates/Admin/dist/index.html',)
 
 
 def login_view(request):
@@ -76,3 +78,118 @@ def tables_view(request):
         "clients": clients,
     }
     return render(request, '../templates/Admin/dist/tables-responsive.html', context=d)
+
+
+def getWarehouses_view():
+    warehouses = client.service.GetWarehouses()
+    return warehouses
+
+
+def getProductBlance_view(CodeProject, CodeSklad):
+    productBlance = client.service.GetProductBalance(CodeProject, CodeSklad)
+    return productBlance
+
+
+def getClients_view(UserCode):
+    clients = client.service.GetClients(UserCode)
+    return clients
+
+
+def getPriceTypes_view(UserCode):
+    priceList = client.service.GetPriceTypes(UserCode)
+    return priceList
+
+
+def getUser_view(request):
+    print(request.GET.get('user'))
+    user = request.GET.get('user')
+    password = request.GET.get('password')
+    user_data = client.service.GetUser(user, password)
+    wharehouses = getWarehouses_view()
+    # print(wharehouses)
+    products = getProductBlance_view(user_data['CodeProject'], user_data['CodeSklad'])
+    clients = getClients_view(user_data['Code'])
+    priceList = getPriceList_view(user_data['Code'])
+    print(user_data),
+    print(priceList)
+    d = {
+        "user": user_data,
+        "clients": clients,
+        "wharehouses": wharehouses,
+        "products": products
+    }
+
+    return render(request, '../templates/Admin/dist/tables-responsive.html', context=d)
+
+
+def getRateOfCurrency_view(Code, Data):
+    currency_rate_now = client.service.GetRateOfCurrency(Code, Data)
+
+
+def getClientBlance(ClientCode, Data):
+    pass
+
+
+def getPriceList_view(UserCode):
+    priceList = client.service.GetPriceList(UserCode)
+    return priceList
+
+
+def checkProductBlance_view(UserCode):
+    pass
+
+
+def getOrderList(CodeAgent):
+    pass
+
+
+def getOrderDetail_view(NumberOrder, OrderDate1, OrderDate2):
+    pass
+
+
+def getShippingList_view(UserCode):
+    pass
+
+
+def getBusinessRegions_view(UserCode):
+    pass
+
+
+def getDiscountList_view(UserCode):
+    pass
+
+
+def getReasonOfReturn_view(UserCode):
+    pass
+
+
+def getCashmansList_view(UserCode):
+    pass
+
+
+def getKPI(CodeUser):
+    pass
+
+
+def getDilers():
+    pass
+
+
+def getOrganizations():
+    pass
+
+
+def getWarehousesUser(CodeUser):
+    pass
+
+
+def getContracts(CodeUser, CodeClient):
+    pass
+
+
+def getClientsThroughINN(INN):
+    pass
+
+
+def getBankName(MFO):
+    pass
